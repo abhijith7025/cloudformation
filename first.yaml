@@ -1,0 +1,70 @@
+Description: This creates something let's find out what
+Parameters:
+  InstanceName:
+    Description: Enter the name of the instance
+    Type: String
+    Default: CF-instance
+  InstanceType:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - m1.small
+      - m1.large
+    Description: Enter the instance type you want default in t2.micro
+  SGDescription:
+    Description: Enter a description for security group
+    Type: String
+  SGName:
+    Description: Enter a name for SG
+    Default: CF_SG
+    Type: String
+
+Resources:
+  SG:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: 
+        Ref: SGDescription
+      GroupName:
+        Ref: SGName
+      SecurityGroupIngress: 
+     
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+
+      Tags: 
+      - Key: cool
+        Value: yes
+      VpcId: vpc-c7b872ac
+
+  Instance:
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId: ami-068257025f72f470d
+      InstanceType:
+        Ref: InstanceType
+      KeyName: ec2_key
+      Monitoring: False
+      SecurityGroupIds: 
+      - Ref: SG
+      Tags: 
+      - Key: cool
+        Value: Yes
+      UserData:
+        Fn::Base64: 
+          !Sub |
+            #!/bin/bash
+            yum update -y
+            yum install -y httpd.x86_64
+            systemctl start httpd.service
+            systemctl enable httpd.service
+            echo ?Hello World from $(hostname -f)? > /var/www/html/index.html
+
