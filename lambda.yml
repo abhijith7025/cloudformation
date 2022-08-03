@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  This template launches a lambda function
+Parameters:
+  FunctionName:
+    Description: Enter the function name you want to give
+    Type: String
+  MemorySize:
+    Description: Enter the RAM you want to give to the function in MB
+    Type: Number
+    Default: 128
+  FunTimeOut:
+    Description: Enter the timeout for Function in seconds
+    Type: Number
+    Default: 3
+  FunRole:
+    Description: Enter the name you want to give to the role this only has basic lambda permissions
+    Type: String
+  
+Resources:
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+
+      Description: Provides basic lambda permissions
+      ManagedPolicyArns: 
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      RoleName:
+        Ref: FunRole
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties: 
+      Code: 
+        S3Bucket: linux-app-codedeploy
+        S3Key: lambda_function.zip
+      Description: This lambda just prints a hello 
+      Environment: 
+        Variables:
+          Name: lambdadb
+          databaseUser: admin
+      FunctionName: 
+        Ref: FunctionName
+      Handler: lambda_function.lambda_handler
+
+      MemorySize:
+        Ref: MemorySize
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.9
+      Timeout:
+        Ref: FunTimeOut
