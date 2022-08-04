@@ -1,0 +1,237 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  This template creates a VPC, 3 public subnets, 3 private subnets, 2 route tables
+  1 internet gateway and one natgateway and connects it all together
+
+Parameters:
+  EnvironmentType: 
+    Description: The environment type eg - Dev, Prod, Uat
+    Type: String
+  VPCCidr:
+    Description: The cidr block you want for your vpc
+    Type: String
+    Default: 10.0.0.0/16
+  PublicSubnet1AZ:
+    Description: The availablity zone you want for your public subnet1
+    Type: AWS::EC2::AvailabilityZone::Name
+  PublicSubnet2AZ:
+    Description: The availablity zone you want for your public subnet2
+    Type: AWS::EC2::AvailabilityZone::Name
+  PublicSubnet3AZ:
+    Description: The availablity zone you want for your public subnet3
+    Type: AWS::EC2::AvailabilityZone::Name
+  PrivateSubnet1AZ:
+    Description: The availablity zone you want for your private subnet1
+    Type: AWS::EC2::AvailabilityZone::Name
+  PrivateSubnet2AZ:
+    Description: The availablity zone you want for your private subnet2
+    Type: AWS::EC2::AvailabilityZone::Name
+  PrivateSubnet3AZ:
+    Description: The availablity zone you want for your private subnet3
+    Type: AWS::EC2::AvailabilityZone::Name
+  PublicSubnet1Cidr:
+    Description: Enter the CIDR block for public subnet1 it should fall under the vpc cidr given above
+    Type: String
+    Default: 10.0.1.0/24
+  PublicSubnet2Cidr:
+    Description: Enter the CIDR block for public subnet2 it should fall under the vpc cidr given above
+    Type: String
+    Default: 10.0.2.0/24
+  PublicSubnet3Cidr:
+    Description: Enter the CIDR block for public subnet3 it should fall under the vpc cidr given above
+    Type: String
+    Default: 10.0.3.0/24
+  PrivateSubnet1Cidr:
+    Description: Enter the CIDR block for private subnet1 it should fall under the vpc cidr given above
+    Type: String
+    Default: 10.0.4.0/24
+  PrivateSubnet2Cidr:
+    Description: Enter the CIDR block for private subnet2 it should fall under the vpc cidr given above
+    Type: String
+    Default: 10.0.5.0/24
+  PrivateSubnet3Cidr:
+    Description: Enter the CIDR block for private subnet3 it should fall under the vpc cidr given above
+    Type: String
+    Default: 10.0.6.0/24
+  
+
+Resources:
+  MyVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock:
+        Ref: VPCCidr
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentType}-VPC'
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref PublicSubnet1AZ
+      VpcId: !GetAtt MyVPC.VpcId
+      CidrBlock:
+        Ref: PublicSubnet1Cidr
+      MapPublicIpOnLaunch: True
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentType}-publicsubnet1'
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Ref: PublicSubnet2AZ
+      VpcId: !GetAtt MyVPC.VpcId
+      CidrBlock:
+        Ref: PublicSubnet2Cidr
+      MapPublicIpOnLaunch: True
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentType}-publicsubnet2'
+  PublicSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Ref: PublicSubnet3AZ
+      VpcId: !GetAtt MyVPC.VpcId
+      CidrBlock:
+        Ref: PublicSubnet3Cidr
+      MapPublicIpOnLaunch: True
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentType}-publicsubnet3'
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Ref: PrivateSubnet1AZ
+      VpcId: !GetAtt MyVPC.VpcId
+      CidrBlock:
+        Ref: PrivateSubnet1Cidr
+      MapPublicIpOnLaunch: True
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentType}-privatesubnet1'
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Ref: PrivateSubnet2AZ
+      VpcId: !GetAtt MyVPC.VpcId
+      CidrBlock:
+        Ref: PrivateSubnet2Cidr
+      MapPublicIpOnLaunch: True
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentType}-privatesubnet2'
+  PrivateSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Ref: PrivateSubnet3AZ
+      VpcId: !GetAtt MyVPC.VpcId
+      CidrBlock:
+        Ref: PrivateSubnet3Cidr
+      MapPublicIpOnLaunch: True
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentType}-privatesubnet3'
+
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !GetAtt MyVPC.VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentType}-Private-RT'
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !GetAtt MyVPC.VpcId
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentType}-Public-RT'
+
+  PulicRTassociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+
+  PulicRTassociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+
+  PulicRTassociation3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet3
+      RouteTableId: !Ref PublicRouteTable
+
+
+  PrivateRTassociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateRTassociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateRTassociation3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet3
+      RouteTableId: !Ref PrivateRouteTable
+
+  IntGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentType}-IGW'
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref MyVPC
+      InternetGatewayId: !Ref IntGateway
+
+  MyNat:
+    Type: AWS::EC2::NatGateway
+    Properties: 
+      AllocationId: !GetAtt MyEIP.AllocationId
+      SubnetId: !Ref PublicSubnet1
+      Tags: 
+        - Key: Name
+          Value: !Sub '${EnvironmentType}-NAT'
+
+  MyEIP:
+    Type: AWS::EC2::EIP
+    Properties: 
+      Tags: 
+        - Key: Name
+          Value: !Sub '${EnvironmentType}-EIP'
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !GetAtt IntGateway.InternetGatewayId
+
+  PrivateRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId : !Ref MyNat
+
+
+

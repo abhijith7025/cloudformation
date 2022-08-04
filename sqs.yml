@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  This template creates a two sqs queues one as deadletter queues
+
+Parameters:
+  QueueName:
+    Description: Enter the name for the sqs queue
+    Type: String
+  DLQname:
+    Description: Enter the name for DLQ
+    Type: String
+
+
+Resources:
+  sqsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Ref QueueName
+      DelaySeconds: 0
+      MaximumMessageSize: 262144
+      RedrivePolicy: 
+        deadLetterTargetArn: !GetAtt DLQueue.Arn
+        maxReceiveCount: 5
+      MessageRetentionPeriod: 1209600
+      KmsMasterKeyId: alias/aws/sqs
+      ReceiveMessageWaitTimeSeconds: 0
+      VisibilityTimeout: 300
+
+  DLQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Ref DLQname
+      DelaySeconds: 0
+      MaximumMessageSize: 262144
+      MessageRetentionPeriod: 1209600
+      KmsMasterKeyId: alias/aws/sqs
+      ReceiveMessageWaitTimeSeconds: 0
+      VisibilityTimeout: 300
