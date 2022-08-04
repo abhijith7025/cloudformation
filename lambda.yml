@@ -34,6 +34,7 @@ Resources:
       Description: Provides basic lambda permissions
       ManagedPolicyArns: 
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
       Policies:
         - PolicyDocument: 
             Version: "2012-10-17"
@@ -65,6 +66,13 @@ Resources:
       Runtime: python3.9
       Timeout:
         Ref: FunTimeOut
+      VpcConfig:
+        SecurityGroupIds: 
+          - sg-06909695df9d48c68
+        SubnetIds: 
+          - subnet-01c8ddf602687b558
+          - subnet-0a5b0d3addb8bd1e1
+          - subnet-04b66b8955c2d7693
   LambdaSQS:
     Type: AWS::Lambda::EventSourceMapping
     Properties: 
