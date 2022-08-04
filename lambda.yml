@@ -34,6 +34,14 @@ Resources:
       Description: Provides basic lambda permissions
       ManagedPolicyArns: 
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyDocument: 
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: 'sqs:*'
+                Resource: '*'
+          PolicyName: Access-sqs-queue
       RoleName:
         Ref: FunRole
   LambdaFunction:
@@ -57,3 +65,12 @@ Resources:
       Runtime: python3.9
       Timeout:
         Ref: FunTimeOut
+  LambdaSQS:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties: 
+      BatchSize: 1000
+      Enabled: True
+      EventSourceArn: arn:aws:sqs:ap-south-1:955924813459:q
+      FunctionName: !Ref LambdaFunction
+      MaximumBatchingWindowInSeconds: 60
+
